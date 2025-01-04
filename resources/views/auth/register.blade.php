@@ -2,8 +2,6 @@
     <form method="POST" action="{{ route('register') }}">
         @csrf
 
-        {{ $errors }}
-
         <!-- Name -->
         <div>
             <x-input-label for="name" value="Nome:" />
