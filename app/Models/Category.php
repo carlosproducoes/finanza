@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class Category extends Model
 {
     use HasFactory;
+
+    public function scopeCompanyId ($query)
+    {
+        return $query->where('company_id', session('company_id'));
+    }
     
     public function movementType ()
     {
