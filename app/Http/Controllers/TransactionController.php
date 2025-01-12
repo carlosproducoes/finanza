@@ -8,6 +8,7 @@ use App\Models\Transaction;
 use Illuminate\Container\Attributes\Auth;
 use Illuminate\Http\Request;
 use App\Services\TransactionService;
+use Carbon\Carbon;
 use Exception;
 
 class TransactionController extends Controller
@@ -19,14 +20,74 @@ class TransactionController extends Controller
         $this->transactionService = new TransactionService();
     }
 
-    public function index ()
+    public function index (Request $request)
     {
-        $transactions = Transaction::companyId()
-            ->orderBy('date', 'desc')
-            ->orderBy('id', 'desc')
-            ->paginate(50);
+        $movementTypes = MovementType::all();
+        $bankAccounts = BankAccount::companyId()->get();
+        $query = Transaction::companyId();
 
-        return view('transactions.index', compact('transactions'));
+        $filtersActivated = [];
+
+        if ($request->has('search') && !empty($request->search)) {
+            $filtersActivated['search'] = [
+                'name' => 'Busca',
+                'value' => $request->input('search')
+            ];
+
+            $query->where('description', 'LIKE', "%{$request->input('search')}%");
+        }
+
+        if ($request->has('start_date') && !empty($request->start_date)) {
+            $startDate = Carbon::createFromFormat('d/m/Y', $request->input('start_date'))->format('Y-m-d');
+            $filtersActivated['start_date'] = [
+                'name' => 'Data início',
+                'value' => $request->start_date
+            ];
+
+            $query->where('date', '>=', $startDate);
+        }
+
+        if ($request->has('end_date') && !empty($request->end_date)) {
+            $endDate = Carbon::createFromFormat('d/m/Y', $request->input('end_date'))->format('Y-m-d');
+            $filtersActivated['end_date'] = [
+                'name' => 'Data fim',
+                'value' => $request->end_date
+            ];
+
+            $query->where('date', '<=', $endDate);
+        }
+
+        if ($request->has('movement_type') && !empty($request->movement_type)) {
+            $filtersActivated['movement_type'] = [
+                'name' => 'Tipo',
+                'value' => $movementTypes->find($request->movement_type)->name == 'entry' ? 'Entrada' : 'Saída'
+            ];
+
+            $query->where('movement_type_id', '=', $request->input('movement_type'));
+        }
+
+        if ($request->has('bank_account') && !empty($request->bank_account)) {
+            $filtersActivated['bank_account'] = [
+                'name' => 'Conta',
+                'value' => $bankAccounts->find($request->bank_account)->name
+            ];
+
+            $query->where('bank_account_id', '=', $request->input('bank_account'));
+        }
+
+        $query->orderBy('date', 'desc')
+                ->orderBy('id', 'desc')
+                ->paginate(50);
+
+        $transactions = $query->get();
+
+        return view('transactions.index')
+                    ->with([
+                        'transactions' => $transactions,
+                        'movementTypes' => $movementTypes,
+                        'bankAccounts' => $bankAccounts,
+                        'filtersActivated' => $filtersActivated,
+                    ]);
     }
 
     public function create ()
