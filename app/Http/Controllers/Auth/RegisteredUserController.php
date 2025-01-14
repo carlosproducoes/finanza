@@ -78,6 +78,8 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
+        session(['company_id' => Auth::user()->company_id]);
+
         return redirect(route('dashboard', absolute: false));
     }
 }

@@ -18,6 +18,12 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             CompanySeeder::class,
             UserSeeder::class,
+            MovementTypeSeeder::class,
+            BankAccountSeeder::class,
+            CategorySeeder::class,
+            FinancialAccountStatusSeeder::class,
+            FinancialAccountSeeder::class,
+            TransactionSeeder::class,
         ]);
 
         User::factory()
