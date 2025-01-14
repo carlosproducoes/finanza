@@ -18,27 +18,27 @@
                             <x-text-input id="search" class=""
                                                 type="text"
                                                 name="search"
-                                                value="{{ old('search', request()->input('search')) }}"
+                                                value="{{ session('transactions_filters.search.value', old('search')) }}"
                                                 placeholder="Busque por algo..." />
 
 
                             <x-text-input id="start_date" class=""
                                                 type="text"
                                                 name="start_date"
-                                                value="{{ old('start_date', request()->input('start_date')) }}"
+                                                value="{{ session('transactions_filters.start_date.value', old('start_date')) }}"
                                                 placeholder="Data início" />
 
                             <x-text-input id="end_date" class=""
                                                 type="text"
                                                 name="end_date"
-                                                value="{{ old('end_date', request()->input('end_date')) }}"
+                                                value="{{ session('transactions_filters.end_date.value', old('end_date')) }}"
                                                 placeholder="Data fim" />
                             
                             <select name="movement_type" id="movement_type" class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
                                     <option value="" class="border-gray-300 rounded-md shadow-sm">Tipo</option>
 
                                     @foreach($movementTypes as $movementType)
-                                        <option value="{{ $movementType->id }}" class="border-gray-300 rounded-md shadow-sm" {{ old('movement_type', request()->input('movement_type')) == $movementType->id ? 'selected' : '' }}>
+                                        <option value="{{ $movementType->id }}" class="border-gray-300 rounded-md shadow-sm" {{ session('transactions_filters.movement_type.input') == $movementType->id ? 'selected' : '' }}>
                                             @if($movementType->name == 'entry')
                                                 Entrada
                                             @else
@@ -52,7 +52,7 @@
                                     <option value="" class="border-gray-300 rounded-md shadow-sm">Conta</option>
 
                                     @foreach($bankAccounts as $bankAccount)
-                                        <option value="{{ $bankAccount->id }}" class="border-gray-300 rounded-md shadow-sm" {{ old('bank_account', request()->input('bank_account')) == $bankAccount->id ? 'selected' : '' }}>{{ $bankAccount->name }}</option>
+                                        <option value="{{ $bankAccount->id }}" class="border-gray-300 rounded-md shadow-sm" {{ session('transactions_filters.bank_account.input') == $bankAccount->id ? 'selected' : '' }}>{{ $bankAccount->name }}</option>
                                     @endforeach
                             </select>
 
@@ -67,21 +67,17 @@
                 </form>
 
                 <div id="filters-activated" class="text-sm">
-                    @if(!empty($filtersActivated))
+                    @if(!empty($filters))
                     
                         <div class="font-bold mb-1">Filtros ativos:</div>
 
                         <div class="flex gap-2">
 
-                            @foreach($filtersActivated as $key => $filter)
+                            @foreach($filters as $key => $filter)
                                 <form action="{{ route('transaction.index') }}" method="POST">
                                     @csrf
 
-                                    @foreach($filtersActivated as $name => $value)
-                                        @if($key !== $name)
-                                            <input type="hidden" name="{{ $name }}" value="{{ request()->$name }}">
-                                        @endif
-                                    @endforeach
+                                    <input type="hidden" name="remove_filter" value="{{ $key }}"> 
 
                                     <div class="flex gap-2 px-4 py-2 bg-white text-gray-600 border-2 border-gray-300 rounded-full">
                                         <div>{{ $filter['name'] }}: {{ $filter['value'] }}</div>
@@ -114,6 +110,7 @@
                                     <th class="px-4 py-2 text-left font-semibold text-gray-600">Tipo</th>
                                     <th class="px-4 py-2 text-left font-semibold text-gray-600">Conta</th>
                                     <th class="px-4 py-2 text-left font-semibold text-gray-600">Saldo</th>
+                                    <th class="px-4 py-2 text-left font-semibold text-gray-600">Ações</th>
                                 </tr>
                             </thead>
 
@@ -131,7 +128,17 @@
                                             @endif
                                         </td>
                                         <td class="px-4 py-2 border-b text-gray-600">{{ $transaction->bankAccount->name }}</td>
-                                        <td class="px-4 py-2 border-b text-gray-600">{{ number_format($transaction->current_balance, 2, ',', '.') }}</td>                                        
+                                        <td class="px-4 py-2 border-b text-gray-600">{{ number_format($transaction->current_balance, 2, ',', '.') }}</td>
+                                        <td class="px-4 py-2 border-b text-gray-600">
+                                            <div class="flex gap-2">
+                                                <a href="" class="px-3 py-1 rounded bg-blue-500 text-white">Editar</a>
+                                                <form action="" method="POST">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="px-3 py-1 rounded bg-red-500 text-white" onclick="return confirm('Tem certeza que deseja deletar?')">Deletar</button>
+                                                </form>
+                                            </div>
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>

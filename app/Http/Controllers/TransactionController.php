@@ -26,53 +26,96 @@ class TransactionController extends Controller
         $bankAccounts = BankAccount::companyId()->get();
         $query = Transaction::companyId();
 
-        $filtersActivated = [];
+        $filters = session('transactions_filters', []);
 
-        if ($request->has('search') && !empty($request->search)) {
-            $filtersActivated['search'] = [
-                'name' => 'Busca',
-                'value' => $request->input('search')
-            ];
-
-            $query->where('description', 'LIKE', "%{$request->input('search')}%");
+        if (!is_array($filters)) {
+            $filters = [];
         }
 
-        if ($request->has('start_date') && !empty($request->start_date)) {
-            $startDate = Carbon::createFromFormat('d/m/Y', $request->input('start_date'))->format('Y-m-d');
-            $filtersActivated['start_date'] = [
-                'name' => 'Data início',
-                'value' => $request->start_date
-            ];
-
-            $query->where('date', '>=', $startDate);
+        if ($request->has('remove_filter') && !empty($request->remove_filter)) {
+            unset($filters[$request->remove_filter]);
         }
 
-        if ($request->has('end_date') && !empty($request->end_date)) {
-            $endDate = Carbon::createFromFormat('d/m/Y', $request->input('end_date'))->format('Y-m-d');
-            $filtersActivated['end_date'] = [
-                'name' => 'Data fim',
-                'value' => $request->end_date
-            ];
-
-            $query->where('date', '<=', $endDate);
+        if ($request->has('search')) {
+            if (!empty($request->input('search'))) {
+                $filters['search'] = [
+                    'name' => 'Busca',
+                    'value' => $request->input('search'),
+                    'input' => $request->input('search')
+                ];
+            } else {
+                unset($filters['search']);
+            }
         }
 
-        if ($request->has('movement_type') && !empty($request->movement_type)) {
-            $filtersActivated['movement_type'] = [
-                'name' => 'Tipo',
-                'value' => $movementTypes->find($request->movement_type)->name == 'entry' ? 'Entrada' : 'Saída'
-            ];
-
-            $query->where('movement_type_id', '=', $request->input('movement_type'));
+        if ($request->has('start_date')) {
+            if (!empty($request->input('start_date'))) {
+                $startDate = Carbon::createFromFormat('d/m/Y', $request->input('start_date'))->format('Y-m-d');
+                $filters['start_date'] = [
+                    'name' => 'Data início',
+                    'value' => $request->start_date,
+                    'input' => $startDate
+                ];
+            } else {
+                unset($filters['start_date']);
+            }
         }
 
-        if ($request->has('bank_account') && !empty($request->bank_account)) {
-            $filtersActivated['bank_account'] = [
-                'name' => 'Conta',
-                'value' => $bankAccounts->find($request->bank_account)->name
-            ];
+        if ($request->has('end_date')) {
+            if (!empty($request->input('end_date'))) {
+                $endDate = Carbon::createFromFormat('d/m/Y', $request->input('end_date'))->format('Y-m-d');
+                $filters['end_date'] = [
+                    'name' => 'Data fim',
+                    'value' => $request->end_date,
+                    'input' => $endDate
+                ];
+            } else {
+                unset($filters['end_date']);
+            }
+        }
 
-            $query->where('bank_account_id', '=', $request->input('bank_account'));
+        if ($request->has('movement_type')) {
+            if (!empty($request->input('movement_type'))) {
+                $filters['movement_type'] = [
+                    'name' => 'Tipo',
+                    'value' => $movementTypes->find($request->movement_type)->name == 'entry' ? 'Entrada' : 'Saída',
+                    'input' => $request->movement_type
+                ];
+            } else {
+                unset($filters['movement_type']);
+            }
+        }
+
+        if ($request->has('bank_account')) {
+            if (!empty($request->input('bank_account'))) {
+                $filters['bank_account'] = [
+                    'name' => 'Conta',
+                    'value' => $bankAccounts->find($request->bank_account)->name,
+                    'input' => $request->bank_account
+                ];
+            } else {
+                unset($filters['bank_account']);
+            }
+        }
+
+        if (array_key_exists('search', $filters) && !empty($filters['search'])) {
+            $query->where('description', 'LIKE', "%{$filters['search']['input']}%");
+        }
+
+        if (array_key_exists('start_date', $filters) && !empty($filters['start_date'])) {
+            $query->where('date', '>=', $filters['start_date']['input']);
+        }
+
+        if (array_key_exists('end_date', $filters) && !empty($filters['end_date'])) {
+            $query->where('date', '<=', $filters['end_date']['input']);
+        }
+
+        if (array_key_exists('movement_type', $filters) && !empty($filters['movement_type'])) {
+            $query->where('movement_type_id', '=', $filters['movement_type']['input']);
+        }
+
+        if (array_key_exists('bank_account', $filters) && !empty($filters['bank_account'])) {
+            $query->where('bank_account_id', '=', $filters['bank_account']['input']);
         }
 
         $query->orderBy('date', 'desc')
@@ -81,12 +124,14 @@ class TransactionController extends Controller
 
         $transactions = $query->get();
 
+        session(['transactions_filters' => $filters]);
+
         return view('transactions.index')
                     ->with([
                         'transactions' => $transactions,
                         'movementTypes' => $movementTypes,
                         'bankAccounts' => $bankAccounts,
-                        'filtersActivated' => $filtersActivated,
+                        'filters' => $filters,
                     ]);
     }
 
