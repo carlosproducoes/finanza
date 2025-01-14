@@ -131,7 +131,7 @@
                                         <td class="px-4 py-2 border-b text-gray-600">{{ number_format($transaction->current_balance, 2, ',', '.') }}</td>
                                         <td class="px-4 py-2 border-b text-gray-600">
                                             <div class="flex gap-2">
-                                                <a href="" class="px-3 py-1 rounded bg-blue-500 text-white">Editar</a>
+                                                <a href="{{ route('transaction.edit', $transaction) }}" class="px-3 py-1 rounded bg-blue-500 text-white">Editar</a>
                                                 <form action="" method="POST">
                                                     @csrf
                                                     @method('DELETE')

@@ -9,10 +9,11 @@
                 <div class="p-6 text-gray-900 dark:text-gray-100">
                     <div class="overflow-x-auto">
 
-                        <h2 class="text-center text-xl font-bold">Adicionar Transação</h2>
+                        <h2 class="text-center text-xl font-bold">Editar Transação</h2>
                         
-                        <form action="{{ route('transaction.store') }}" method="POST" class="w-1/2 m-auto">
+                        <form action="{{ route('transaction.update', $transaction) }}" method="POST" class="w-1/2 m-auto">
                             @csrf
+                            @method('PUT')
 
                             @if ($errors->has('error'))
                                 <div class="bg-red-500 text-white px-3 py-2 my-4 rounded">{{ $errors->get('error')[0] }}</div>
@@ -20,7 +21,7 @@
 
                             @include('transactions.form')
 
-                            <button type="submit" class="mt-3 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">Adicionar</button>
+                            <button type="submit" class="mt-3 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">Editar</button>
 
                         </form>
 
