@@ -8,9 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('companies', function (Blueprint $table) {
+        Schema::create('bank_accounts', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('name')->nullable(false);
+            $table->decimal('balance', 10, 2)->nullable(false);
+            $table->foreignId('company_id')->nullable(false)->constrained();
             $table->timestamps();
             $table->softDeletes();
         });
@@ -18,6 +20,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('companies');
+        Schema::dropIfExists('bank_accounts');
     }
 };
