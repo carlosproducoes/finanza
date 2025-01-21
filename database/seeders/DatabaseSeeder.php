@@ -21,7 +21,8 @@ class DatabaseSeeder extends Seeder
             BankAccountSeeder::class,
             CategorySeeder::class,
             FinancialAccountSeeder::class,
-            InstallmentSeeder::class
+            InstallmentSeeder::class,
+            TransactionSeeder::class
         ]);
 
         User::factory()
