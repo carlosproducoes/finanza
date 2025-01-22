@@ -22,11 +22,6 @@ class RegisteredUserController extends Controller
         return view('auth.register');
     }
 
-    /**
-     * Handle an incoming registration request.
-     *
-     * @throws \Illuminate\Validation\ValidationException
-     */
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
@@ -57,7 +52,7 @@ class RegisteredUserController extends Controller
 
             'password.required' => 'A senha é obrigatória.',
             'password.confirmed' => 'As senhas não coincidem.',
-            'password.min' => 'A senha precisa ter no mínimo 8 caracteres.', // Ajuste conforme a configuração de "password" padrão
+            'password.min' => 'A senha precisa ter no mínimo 8 caracteres.',
         ]);
 
         $companyName = !empty($request->company_name) ? $request->company_name : $request->name;
@@ -73,6 +68,8 @@ class RegisteredUserController extends Controller
             'role_id' => Role::first()->id,
             'company_id' => $company->id,
         ]);
+
+        session(['company_id' => $company->id]);
 
         event(new Registered($user));
 
