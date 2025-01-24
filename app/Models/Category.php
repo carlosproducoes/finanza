@@ -11,6 +11,12 @@ class Category extends Model
     use SoftDeletes;
     use HasFactory;
 
+    protected $fillable = [
+        'name',
+        'movement_type',
+        'company_id'
+    ];
+
     public function parent ()
     {
         return $this->belongsTo(Category::class);
