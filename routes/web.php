@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BankAccountController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\FinancialAccountController;
 
 require __DIR__.'/auth.php';
 
@@ -29,6 +30,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/categories/{category}/edit', [CategoryController::class, 'edit'])->name('categories.edit');
     Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
     Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+
+    Route::get('/financial-accounts', [FinancialAccountController::class, 'index'])->name('financial-accounts.index');
+    Route::get('/financial-accounts/create/{movementType}', [FinancialAccountController::class, 'create'])->name('financial-accounts.create');
+    Route::post('/financial-accounts', [FinancialAccountController::class, 'store'])->name('financial-accounts.store');
+    Route::get('/financial-accounts/{financialAccount}/edit', [FinancialAccountController::class, 'edit'])->name('financial-accounts.edit');
+    Route::put('/financial-accounts/{financialAccount}', [FinancialAccountController::class, 'update'])->name('financial-accounts.update');
+    Route::delete('/financial-accounts/{financialAccount}', [FinancialAccountController::class, 'destroy'])->name('financial-accounts.destroy');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

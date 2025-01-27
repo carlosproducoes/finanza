@@ -11,6 +11,15 @@ class FinancialAccount extends Model
     use SoftDeletes;
     use HasFactory;
 
+    protected $fillable = [
+        'description',
+        'due_date',
+        'projected_amount',
+        'movement_type',
+        'category_id',
+        'company_id'
+    ];
+
     public function category ()
     {
         return $this->belongsTo(Category::class);
