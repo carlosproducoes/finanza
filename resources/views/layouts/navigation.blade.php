@@ -15,6 +15,7 @@
                 <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">Dashboard</x-nav-link>
                 <x-nav-link :href="route('bank-accounts.index')" :active="request()->routeIs('bank-accounts.*')">Contas</x-nav-link>
                 <x-nav-link :href="route('categories.index')" :active="request()->routeIs('categories.*')">Categorias</x-nav-link>
+                <x-nav-link :href="route('financial-accounts.index')" :active="request()->routeIs('financial-accounts.*')">Contas a Pagar/Receber</x-nav-link>
                 </div>
             </div>
 
@@ -70,6 +71,7 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">Dashboard</x-responsive-nav-link>
             <x-responsive-nav-link :href="route('bank-accounts.index')" :active="request()->routeIs('bank-accounts.*')">Contas</x-responsive-nav-link>
             <x-responsive-nav-link :href="route('categories.index')" :active="request()->routeIs('categories.*')">Categorias</x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('financial-accounts.index')" :active="request()->routeIs('financial-accounts.*')">Contas a Pagar/Receber</x-responsive-nav-link>
         </div>
 
         <!-- Responsive Settings Options -->
