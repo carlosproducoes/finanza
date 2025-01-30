@@ -31,6 +31,7 @@ class TransactionFactory extends Factory
         return [
             'description' => fake()->sentence(3),
             'amount' => fake()->randomFloat(2, 100, 4000),
+            'date' =>fake()->date(),
             'movement_type' => Arr::random(['entry', 'exit']),
             'reference_id' => $referenceId,
             'reference_type' => $referenceType,
