@@ -11,6 +11,16 @@ class Transaction extends Model
     use SoftDeletes;
     use HasFactory;
 
+    protected $fillable = [
+        'description',
+        'amount',
+        'date',
+        'movement_type',
+        'category_id',
+        'bank_account_id',
+        'company_id'
+    ];
+
     public function category ()
     {
         return $this->belongsTo(Category::class);
