@@ -42,7 +42,7 @@
         <option value="" @if(empty(old('category_id', $financialAccount->category_id ?? ''))) selected @endif>Categoria</option>
 
         @foreach($categories as $category)
-            <option value="{{ $category->id }}" @if($financialAccount->category_id == $category->id) selected @endif>{{ $category->name }}</option>
+            <option value="{{ $category->id }}" @if(old('category_id', $financialAccount->category_id ?? '') == $category->id) selected @endif>{{ $category->name }}</option>
         @endforeach
     </select>
 

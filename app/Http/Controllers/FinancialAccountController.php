@@ -38,7 +38,7 @@ class FinancialAccountController extends Controller
         }
 
         $request->validate([
-            'description' => 'required|string|max:255',
+            'description' => 'max:255',
             'due_date' => 'required|date',
             'projected_amount' => 'required|numeric',
             'category_id' => 'required|exists:categories,id,company_id,' . session('company_id') . ',movement_type,' . $request->movement_type,
@@ -57,8 +57,14 @@ class FinancialAccountController extends Controller
             'category_id.exists' => 'Categoria inválida',
         ]);
 
+        $description = $request->description;
+
+        if (empty($description)) {
+            $description = Category::find($request->category_id)->name;
+        }
+
         FinancialAccount::create([
-            'description' => $request->description,
+            'description' => $description,
             'due_date' => $request->due_date,
             'projected_amount' => $request->projected_amount,
             'movement_type' => $request->movement_type,
@@ -90,7 +96,7 @@ class FinancialAccountController extends Controller
         }
 
         $request->validate([
-            'description' => 'required|string|max:255',
+            'description' => 'max:255',
             'due_date' => 'required|date',
             'projected_amount' => 'required|numeric',
             'category_id' => 'required|exists:categories,id,company_id,' . session('company_id') . ',movement_type,' . $financialAccount->movement_type,
@@ -109,7 +115,13 @@ class FinancialAccountController extends Controller
             'category_id.exists' => 'Categoria inválida',
         ]);
 
-        $financialAccount->description = $request->description;
+        $description = $request->description;
+
+        if (empty($description)) {
+            $description = Category::find($request->category_id)->name;
+        }
+
+        $financialAccount->description = $description;
         $financialAccount->due_date = $request->due_date;
         $financialAccount->projected_amount = $request->projected_amount;
         $financialAccount->category_id = $request->category_id;
