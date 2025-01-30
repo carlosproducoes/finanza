@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('description')->nullable();
             $table->decimal('amount', 10, 2)->nullable(false);
+            $table->date('date')->nullable(false);
             $table->enum('movement_type', ['entry', 'exit'])->nullable(false);
             $table->integer('reference_id')->nullable();
             $table->string('reference_type')->nullable();
