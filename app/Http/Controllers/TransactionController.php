@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\BankAccount;
 use App\Models\Category;
 use App\Models\Transaction;
+use App\Services\TransactionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -63,33 +64,16 @@ class TransactionController extends Controller
             'bank_account,exists' => 'Conta inválida'
         ]);
 
-        DB::transaction(function () use ($request) {
-            $description = $request->description;
+        $data = $request->only([
+            'description',
+            'amount',
+            'date',
+            'movement_type',
+            'category_id',
+            'bank_account'
+        ]);
 
-            if (empty($description)) {
-                $description = Category::find($request->category_id)->name;
-            }
-
-            Transaction::create([
-                'description' => $description,
-                'amount' => $request->amount,
-                'date' => $request->date,
-                'movement_type' => $request->movement_type,
-                'category_id' => $request->category_id,
-                'bank_account_id' => $request->bank_account,
-                'company_id' => session('company_id')
-            ]);
-
-            $bankAccount = BankAccount::find($request->bank_account);
-
-            if ($request->movement_type == 'entry') {
-                $bankAccount->increment('balance', $request->amount);
-            } else if ($request->movement_type == 'exit') {
-                $bankAccount->decrement('balance', abs($request->amount));
-            }
-
-            $bankAccount->save();
-        });
+        TransactionService::createTransaction($data);
 
         return redirect()->route('transactions.index');
     }
@@ -138,58 +122,15 @@ class TransactionController extends Controller
             'bank_account,exists' => 'Conta inválida'
         ]);
 
-        DB::transaction(function () use ($request, $transaction) {
-        
-            $description = $request->description;
+        $data = $request->only([
+            'description',
+            'amount',
+            'date',
+            'category_id',
+            'bank_account'
+        ]);
 
-            if (empty($description)) {
-                $description = Category::find($request->category_id)->name;
-            }
-
-            $transaction->description = $description;
-
-            $bankAccount = BankAccount::find($transaction->bank_account_id);
-
-            if ($transaction->bank_account_id != $request->bank_account) {
-                $newBankAccount = BankAccount::find($request->bank_account);
-
-                if ($transaction->movement_type == 'entry') {
-                    $bankAccount->decrement('balance', abs($transaction->amount));
-                    $newBankAccount->increment('balance', $request->amount);
-                } else if ($transaction->movement_type == 'exit') {
-                    $bankAccount->increment('balance', $transaction->amount);
-                    $newBankAccount->decrement('balance', abs($request->amount));
-                }
-
-                $newBankAccount->save();
-            } else {
-                $difference = (float) $transaction->amount - $request->amount;
-
-                if ($difference < 0) {
-                    if ($transaction->movement_type == 'entry') {
-                        $bankAccount->increment('balance', abs($difference));
-                    } else if ($transaction->movement_type == 'exit') {
-                        $bankAccount->decrement('balance', abs($difference));
-                    }
-                } else if ($difference > 0) {
-                    if ($transaction->movement_type == 'entry') {
-                        $bankAccount->decrement('balance', $difference);
-                    } else if ($transaction->movement_type == 'exit') {
-                        $bankAccount->increment('balance', $difference);
-                    }
-                }
-            }
-
-            $bankAccount->save();
-
-            $transaction->amount = $request->amount;
-            $transaction->date = $request->date;
-            $transaction->category_id = $request->category_id;
-            $transaction->bank_account_id = $request->bank_account;
-
-            $transaction->save();
-
-        });
+        TransactionService::updateTransaction($data, $transaction);
 
         return redirect()->route('transactions.index');
     }
@@ -200,16 +141,7 @@ class TransactionController extends Controller
             return redirect()->route('transactions.index');
         }
 
-        $bankAccount = BankAccount::find($transaction->bank_account_id);
-        
-        if ($transaction->movement_type == 'entry') {
-            $bankAccount->decrement('balance', abs($transaction->amount));
-        } else if ($transaction->movement_type == 'exit') {
-            $bankAccount->increment('balance', $transaction->amount);
-        }
-
-        $bankAccount->save();
-        $transaction->delete();
+        TransactionService::destroyTransaction($transaction);
 
         return redirect()->route('transactions.index');
     }
