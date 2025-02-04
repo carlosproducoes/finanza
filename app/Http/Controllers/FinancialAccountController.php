@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BankAccount;
 use App\Models\Category;
 use App\Models\FinancialAccount;
+use App\Models\Transaction;
+use App\Services\FinancialAccountService;
 use Illuminate\Http\Request;
 
 class FinancialAccountController extends Controller
@@ -38,7 +41,7 @@ class FinancialAccountController extends Controller
         }
 
         $request->validate([
-            'description' => 'required|string|max:255',
+            'description' => 'max:255',
             'due_date' => 'required|date',
             'projected_amount' => 'required|numeric',
             'category_id' => 'required|exists:categories,id,company_id,' . session('company_id') . ',movement_type,' . $request->movement_type,
@@ -57,14 +60,15 @@ class FinancialAccountController extends Controller
             'category_id.exists' => 'Categoria inválida',
         ]);
 
-        FinancialAccount::create([
-            'description' => $request->description,
-            'due_date' => $request->due_date,
-            'projected_amount' => $request->projected_amount,
-            'movement_type' => $request->movement_type,
-            'category_id' => $request->category_id,
-            'company_id' => session('company_id')
+        $data = $request->only([
+            'description',
+            'due_date',
+            'projected_amount',
+            'movement_type',
+            'category_id'
         ]);
+
+        FinancialAccountService::storeFinancialAccount($data);
 
         return redirect()->route('financial-accounts.index');
     }
@@ -90,7 +94,7 @@ class FinancialAccountController extends Controller
         }
 
         $request->validate([
-            'description' => 'required|string|max:255',
+            'description' => 'max:255',
             'due_date' => 'required|date',
             'projected_amount' => 'required|numeric',
             'category_id' => 'required|exists:categories,id,company_id,' . session('company_id') . ',movement_type,' . $financialAccount->movement_type,
@@ -109,19 +113,71 @@ class FinancialAccountController extends Controller
             'category_id.exists' => 'Categoria inválida',
         ]);
 
-        $financialAccount->description = $request->description;
-        $financialAccount->due_date = $request->due_date;
-        $financialAccount->projected_amount = $request->projected_amount;
-        $financialAccount->category_id = $request->category_id;
+        $data = $request->only([
+            'description',
+            'due_date',
+            'projected_amount',
+            'category_id'
+        ]);
 
-        $financialAccount->save();
+        FinancialAccountService::updateFinancialAccount($data, $financialAccount);
+
+        return redirect()->route('financial-accounts.index');
+    }
+
+    public function pay (FinancialAccount $financialAccount)
+    {
+        if ($financialAccount->company_id != session('company_id')) {
+            return redirect()->route('financial-accounts.index');
+        }
+
+        $bankAccounts = BankAccount::where('company_id', '=', session('company_id'))->get();
+
+        return view('financial-accounts.pay', [
+            'financialAccount' => $financialAccount,
+            'bankAccounts' => $bankAccounts
+        ]);
+    }
+
+    public function process (Request $request, FinancialAccount $financialAccount)
+    {
+        if ($financialAccount->company_id != session('company_id')) {
+            return redirect()->route('financial-accounts.index');
+        }
+
+        $request->validate([
+            'payment_date' => 'required|date',
+            'paid_amount' => 'required|numeric',
+            'bank_account' => 'required|exists:bank_accounts,id,company_id,' . session('company_id'),
+        ], [
+            'payment_date.required' => 'A data do pagamento é obrigatória',
+            'payment_date.date' => 'Data do pagamento inválida',
+
+            'paid_amount.required' => 'O valor pago é obrigatório',
+            'paid_amount.numeric' => 'Valor pago inválido',
+
+            'bank_account.required' => 'A conta é obrigatória',
+            'bank_account.exists' => 'Conta inválida'
+        ]);
+
+        $data = $request->only([
+            'payment_date',
+            'paid_amount',
+            'bank_account'
+        ]);
+
+        FinancialAccountService::processFinancialAccount($data, $financialAccount);
 
         return redirect()->route('financial-accounts.index');
     }
 
     public function destroy (FinancialAccount $financialAccount)
     {
-        $financialAccount->delete();
+        if ($financialAccount->company_id != session('company_id')) {
+            return redirect()->route('financial-accounts.index');
+        }
+        
+        FinancialAccountService::destroyFinancialAccount($financialAccount);
 
         return redirect()->route('financial-accounts.index');
     }

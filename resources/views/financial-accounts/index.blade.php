@@ -63,13 +63,16 @@
                                         <th class="px-4 py-2 border-b text-gray-600 text-left">{{ $financialAccount->category->name }}</th>
                                         <th class="px-4 py-2 border-b text-gray-600 text-left">
                                             <div class="flex gap-2">
-                                                <a href="{{ route('financial-accounts.edit', $financialAccount->id) }}" class="bg-yellow-500 text-white py-1 px-2 rounded">Editar</a>
-                                                <form action="{{ route('financial-accounts.destroy', $financialAccount->id) }}" method="POST">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button class="bg-red-500 text-white py-1 px-2 rounded"
-                                                            onclick="event.preventDefault(); if (confirm('Tem certeza que quer deletar essa conta?')) { this.form.submit() }">Deletar</button>
-                                                </form>
+                                                @if($financialAccount->status != 'paid')
+                                                    <a href="{{ route('financial-accounts.pay', $financialAccount->id) }}" class="bg-green-500 text-white py-1 px-2 rounded">Confirmar</a>
+                                                    <a href="{{ route('financial-accounts.edit', $financialAccount->id) }}" class="bg-yellow-500 text-white py-1 px-2 rounded">Editar</a>
+                                                    <form action="{{ route('financial-accounts.destroy', $financialAccount->id) }}" method="POST">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button class="bg-red-500 text-white py-1 px-2 rounded"
+                                                                onclick="event.preventDefault(); if (confirm('Tem certeza que quer deletar essa conta?')) { this.form.submit() }">Deletar</button>
+                                                    </form>
+                                                @endif
                                             </div>
                                         </th>
                                     </tr>
