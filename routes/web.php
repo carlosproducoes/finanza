@@ -38,6 +38,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/financial-accounts/{financialAccount}/edit', [FinancialAccountController::class, 'edit'])->name('financial-accounts.edit');
     Route::put('/financial-accounts/{financialAccount}', [FinancialAccountController::class, 'update'])->name('financial-accounts.update');
     Route::delete('/financial-accounts/{financialAccount}', [FinancialAccountController::class, 'destroy'])->name('financial-accounts.destroy');
+    Route::get('/financial-accounts/{financialAccount}/pay', [FinancialAccountController::class, 'pay'])->name('financial-accounts.pay');
+    Route::put('financial-accounts/{financialAccount}/process', [FinancialAccountController::class, 'process'])->name('financial-accounts.process');
 
     Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
     Route::get('/transactions/create/{movementType}', [TransactionController::class, 'create'])->name('transactions.create');

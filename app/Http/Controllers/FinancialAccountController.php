@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BankAccount;
 use App\Models\Category;
 use App\Models\FinancialAccount;
+use App\Models\Transaction;
+use App\Services\FinancialAccountService;
 use Illuminate\Http\Request;
 
 class FinancialAccountController extends Controller
@@ -57,20 +60,15 @@ class FinancialAccountController extends Controller
             'category_id.exists' => 'Categoria inválida',
         ]);
 
-        $description = $request->description;
-
-        if (empty($description)) {
-            $description = Category::find($request->category_id)->name;
-        }
-
-        FinancialAccount::create([
-            'description' => $description,
-            'due_date' => $request->due_date,
-            'projected_amount' => $request->projected_amount,
-            'movement_type' => $request->movement_type,
-            'category_id' => $request->category_id,
-            'company_id' => session('company_id')
+        $data = $request->only([
+            'description',
+            'due_date',
+            'projected_amount',
+            'movement_type',
+            'category_id'
         ]);
+
+        FinancialAccountService::storeFinancialAccount($data);
 
         return redirect()->route('financial-accounts.index');
     }
@@ -115,25 +113,71 @@ class FinancialAccountController extends Controller
             'category_id.exists' => 'Categoria inválida',
         ]);
 
-        $description = $request->description;
+        $data = $request->only([
+            'description',
+            'due_date',
+            'projected_amount',
+            'category_id'
+        ]);
 
-        if (empty($description)) {
-            $description = Category::find($request->category_id)->name;
+        FinancialAccountService::updateFinancialAccount($data, $financialAccount);
+
+        return redirect()->route('financial-accounts.index');
+    }
+
+    public function pay (FinancialAccount $financialAccount)
+    {
+        if ($financialAccount->company_id != session('company_id')) {
+            return redirect()->route('financial-accounts.index');
         }
 
-        $financialAccount->description = $description;
-        $financialAccount->due_date = $request->due_date;
-        $financialAccount->projected_amount = $request->projected_amount;
-        $financialAccount->category_id = $request->category_id;
+        $bankAccounts = BankAccount::where('company_id', '=', session('company_id'))->get();
 
-        $financialAccount->save();
+        return view('financial-accounts.pay', [
+            'financialAccount' => $financialAccount,
+            'bankAccounts' => $bankAccounts
+        ]);
+    }
+
+    public function process (Request $request, FinancialAccount $financialAccount)
+    {
+        if ($financialAccount->company_id != session('company_id')) {
+            return redirect()->route('financial-accounts.index');
+        }
+
+        $request->validate([
+            'payment_date' => 'required|date',
+            'paid_amount' => 'required|numeric',
+            'bank_account' => 'required|exists:bank_accounts,id,company_id,' . session('company_id'),
+        ], [
+            'payment_date.required' => 'A data do pagamento é obrigatória',
+            'payment_date.date' => 'Data do pagamento inválida',
+
+            'paid_amount.required' => 'O valor pago é obrigatório',
+            'paid_amount.numeric' => 'Valor pago inválido',
+
+            'bank_account.required' => 'A conta é obrigatória',
+            'bank_account.exists' => 'Conta inválida'
+        ]);
+
+        $data = $request->only([
+            'payment_date',
+            'paid_amount',
+            'bank_account'
+        ]);
+
+        FinancialAccountService::processFinancialAccount($data, $financialAccount);
 
         return redirect()->route('financial-accounts.index');
     }
 
     public function destroy (FinancialAccount $financialAccount)
     {
-        $financialAccount->delete();
+        if ($financialAccount->company_id != session('company_id')) {
+            return redirect()->route('financial-accounts.index');
+        }
+        
+        FinancialAccountService::destroyFinancialAccount($financialAccount);
 
         return redirect()->route('financial-accounts.index');
     }

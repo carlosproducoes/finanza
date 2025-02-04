@@ -73,7 +73,7 @@ class TransactionController extends Controller
             'bank_account'
         ]);
 
-        TransactionService::createTransaction($data);
+        TransactionService::storeTransaction($data);
 
         return redirect()->route('transactions.index');
     }
