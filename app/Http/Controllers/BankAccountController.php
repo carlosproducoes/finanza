@@ -46,6 +46,10 @@ class BankAccountController extends Controller
 
     public function edit (BankAccount $bankAccount)
     {
+        if ($bankAccount->company_id != session('company_id')) {
+            return redirect()->route('bank-accounts.index');
+        }
+
         return view('bank-accounts.edit', [
             'bankAccount' => $bankAccount
         ]);
@@ -53,6 +57,10 @@ class BankAccountController extends Controller
 
     public function update (Request $request, BankAccount $bankAccount)
     {
+        if ($bankAccount->company_id != session('company_id')) {
+            return redirect()->route('bank-accounts.index');
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'balance' => 'required|numeric'
@@ -74,6 +82,10 @@ class BankAccountController extends Controller
 
     public function destroy (BankAccount $bankAccount)
     {
+        if ($bankAccount->company_id != session('company_id')) {
+            return redirect()->route('bank-accounts.index');
+        }
+
         $bankAccount->delete();
 
         return redirect()->route('bank-accounts.index');
