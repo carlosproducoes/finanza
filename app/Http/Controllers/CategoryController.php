@@ -46,6 +46,10 @@ class CategoryController extends Controller
 
     public function edit (Category $category)
     {
+        if ($category->company_id != session('company_id')) {
+            return redirect()->route('categories.index');
+        }
+
         return view('categories.edit', [
             'category' => $category
         ]);
@@ -53,6 +57,10 @@ class CategoryController extends Controller
 
     public function update (Request $request, Category $category)
     {
+        if ($category->company_id != session('company_id')) {
+            return redirect()->route('categories.index');
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
         ], [
@@ -69,6 +77,10 @@ class CategoryController extends Controller
 
     public function destroy (Category $category)
     {
+        if ($category->company_id != session('company_id')) {
+            return redirect()->route('categories.index');
+        }
+        
         $category->delete();
 
         return redirect()->route('categories.index');

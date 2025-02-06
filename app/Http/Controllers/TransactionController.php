@@ -7,7 +7,6 @@ use App\Models\Category;
 use App\Models\Transaction;
 use App\Services\TransactionService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class TransactionController extends Controller
 {
