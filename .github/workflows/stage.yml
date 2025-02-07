@@ -12,7 +12,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: 🔧 Build
-    - run: |
+      run: |
         docker/after-up.sh
     
     - name: 📂 Sync files
