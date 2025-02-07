@@ -13,7 +13,8 @@ jobs:
 
     - name: 🔧 Build
       run: |
-        sh docker/after-up.sh
+        npm install
+        npm build
     
     - name: 📂 Sync files
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
