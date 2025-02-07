@@ -13,7 +13,7 @@ jobs:
 
     - name: 🔧 Build
       run: |
-        docker/after-up.sh
+        sh docker/after-up.sh
     
     - name: 📂 Sync files
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
