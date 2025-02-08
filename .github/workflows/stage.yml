@@ -26,4 +26,3 @@ jobs:
         server: ${{ secrets.ftp_host }}
         username: ${{ secrets.ftp_stage_user }}
         password: ${{ secrets.ftp_stage_password }}
-        server-dir: stage-finanza/
