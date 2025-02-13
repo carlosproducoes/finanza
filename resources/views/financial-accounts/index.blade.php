@@ -11,6 +11,12 @@
                     <div class="overflow-x-auto">
 
                         <div class="mb-4">
+                            <div class="flex justify-between items-center px-3 py-2 mb-3">
+                                <a href="{{ route('financial-accounts.index', ['date' => \Carbon\Carbon::createFromFormat('m-Y', $date)->subMonth()->format('m-Y')]) }}" class="text-xl"><</a>
+                                    <h2 class="text-xl font-bold">{{ ucfirst(\Carbon\Carbon::createFromFormat('m-Y', $date)->monthName) }}</h2>
+                                <a href="{{ route('financial-accounts.index', ['date' => \Carbon\Carbon::createFromFormat('m-Y', $date)->addMonth()->format('m-Y')]) }}" class="text-xl">></a>
+                            </div>
+                            
                             <x-dropdown align="left">
                                 <x-slot name="trigger">
                                     <button class="bg-blue-500 text-white py-1 px-3 rounded">Adicionar Conta</button>
