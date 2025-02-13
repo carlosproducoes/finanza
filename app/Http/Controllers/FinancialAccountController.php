@@ -6,17 +6,30 @@ use App\Models\BankAccount;
 use App\Models\Category;
 use App\Models\FinancialAccount;
 use App\Models\Transaction;
+use Carbon\Carbon;
 use App\Services\FinancialAccountService;
 use Illuminate\Http\Request;
 
 class FinancialAccountController extends Controller
 {
-    public function index ()
+    public function index (Request $request)
     {
-        $financialAccounts = FinancialAccount::where('company_id', '=', session('company_id'))->get();
+        $date = Carbon::now()->format('m-Y');
+
+        if (isset($request->date)) {
+            $date = $request->date;
+        }
+
+        [$month, $year] = explode('-', $date);
+
+        $financialAccounts = FinancialAccount::where('company_id', '=', session('company_id'))
+                                                ->whereMonth('due_date', $month)
+                                                ->whereYear('due_date', $year)
+                                                ->get();
         
         return view('financial-accounts.index', [
-            'financialAccounts' => $financialAccounts
+            'financialAccounts' => $financialAccounts,
+            'date' => $date
         ]);
     }
 
