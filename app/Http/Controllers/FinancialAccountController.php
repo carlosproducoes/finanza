@@ -16,7 +16,7 @@ class FinancialAccountController extends Controller
     {
         $date = Carbon::now()->format('m-Y');
 
-        if (isset($request->date)) {
+        if (isset($request->date) && preg_match('/^\d{2}-\d{4}/', $request->date)) {
             $date = $request->date;
         }
 
