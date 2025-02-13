@@ -6,16 +6,29 @@ use App\Models\BankAccount;
 use App\Models\Category;
 use App\Models\Transaction;
 use App\Services\TransactionService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class TransactionController extends Controller
 {
-    public function index ()
+    public function index (Request $request)
     {
-        $transactions = Transaction::where('company_id', '=', session('company_id'))->get();
+        $date = Carbon::now()->format('m-Y');
+
+        if (isset($request->date)) {
+            $date = $request->date;
+        }
+
+        [$month, $year] = explode('-', $date);
+
+        $transactions = Transaction::where('company_id', '=', session('company_id'))
+                                    ->whereMonth('date', $month)
+                                    ->whereYear('date', $year)
+                                    ->get();
         
         return view('transactions.index', [
-            'transactions' => $transactions
+            'transactions' => $transactions,
+            'date' => $date
         ]);
     }
 
