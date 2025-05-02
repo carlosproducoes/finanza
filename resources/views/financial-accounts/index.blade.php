@@ -66,7 +66,7 @@
                                                 <div class="inline bg-red-500 text-white text-md w-auto py-1 px-3 rounded-full">Atrasada</div>
                                             @endif
                                         </th>
-                                        <th class="px-4 py-2 border-b text-gray-600 text-left">{{ $financialAccount->category->name }}</th>
+                                        <th class="px-4 py-2 border-b text-gray-600 text-left">{{ $financialAccount->category }}</th>
                                         <th class="px-4 py-2 border-b text-gray-600 text-left">
                                             <div class="flex gap-2">
                                                 @if($financialAccount->status != 'paid')

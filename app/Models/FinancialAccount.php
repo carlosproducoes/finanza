@@ -29,4 +29,9 @@ class FinancialAccount extends Model
     {
         return $this->belongsTo(Company::class);
     }
+    
+    public function installments ()
+    {
+        return $this->hasMany(Installment::class);
+    }
 }
