@@ -17,6 +17,7 @@
         "vite": "^6.0"
     },
     "dependencies": {
+        "glob": "^10.4.5",
         "jquery": "^3.7.1"
     }
 }
