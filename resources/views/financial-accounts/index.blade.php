@@ -69,16 +69,32 @@
                                         <th class="px-4 py-2 border-b text-gray-600 text-left">{{ $financialAccount->category }}</th>
                                         <th class="px-4 py-2 border-b text-gray-600 text-left">
                                             <div class="flex gap-2">
-                                                @if($financialAccount->status != 'paid')
-                                                    <a href="{{ route('financial-accounts.pay', $financialAccount->id) }}" class="bg-green-500 text-white py-1 px-2 rounded">Confirmar</a>
-                                                    <a href="{{ route('financial-accounts.edit', $financialAccount->id) }}" class="bg-yellow-500 text-white py-1 px-2 rounded">Editar</a>
-                                                    <form action="{{ route('financial-accounts.destroy', $financialAccount->id) }}" method="POST">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button class="bg-red-500 text-white py-1 px-2 rounded"
-                                                                onclick="event.preventDefault(); if (confirm('Tem certeza que quer deletar essa conta?')) { this.form.submit() }">Deletar</button>
-                                                    </form>
-                                                @endif
+                                                @switch ($financialAccount->type)
+                                                    @case ('financial_account')
+                                                        @if($financialAccount->status != 'paid')
+                                                            <a href="{{ route('financial-accounts.pay', ['financialAccount' => $financialAccount->id]) }}" class="bg-green-500 text-white py-1 px-2 rounded">Confirmar</a>
+                                                            <a href="{{ route('financial-accounts.edit', $financialAccount->id) }}" class="bg-yellow-500 text-white py-1 px-2 rounded">Editar</a>
+                                                            <form action="{{ route('financial-accounts.destroy', $financialAccount->id) }}" method="POST">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button class="bg-red-500 text-white py-1 px-2 rounded"
+                                                                        onclick="event.preventDefault(); if (confirm('Tem certeza que quer deletar essa conta?')) { this.form.submit() }">Deletar</button>
+                                                            </form>
+                                                        @endif
+                                                        @break
+                                                    @case ('installment')
+                                                        @if($financialAccount->status != 'paid')
+                                                            <a href="{{ route('installments.pay', $financialAccount->id) }}" class="bg-green-500 text-white py-1 px-2 rounded">Confirmar</a>
+                                                            <a href="{{ route('installments.edit', $financialAccount->id) }}" class="bg-yellow-500 text-white py-1 px-2 rounded">Editar</a>
+                                                            <form action="{{ route('installments.destroy', $financialAccount->id) }}" method="POST">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button class="bg-red-500 text-white py-1 px-2 rounded"
+                                                                        onclick="event.preventDefault(); if (confirm('Tem certeza que quer deletar essa parcela?')) { this.form.submit() }">Deletar</button>
+                                                            </form>
+                                                        @endif
+                                                        @break
+                                                @endswitch
                                             </div>
                                         </th>
                                     </tr>

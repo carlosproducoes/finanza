@@ -16,6 +16,7 @@ class FinancialAccount extends Model
         'due_date',
         'projected_amount',
         'movement_type',
+        'total_installments',
         'category_id',
         'company_id'
     ];

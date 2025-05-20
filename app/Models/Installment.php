@@ -11,6 +11,15 @@ class Installment extends Model
     use SoftDeletes;
     use HasFactory;
 
+    protected $fillable = [
+        'number',
+        'due_date',
+        'projected_amount',
+        'status',
+        'financial_account_id',
+        'company_id'
+    ];
+
     public function financialAccount ()
     {
         return $this->belongsTo(FinancialAccount::class);

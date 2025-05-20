@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BankAccountController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\FinancialAccountController;
+use App\Http\Controllers\InstallmentController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\DashboardController;
 
@@ -39,6 +40,12 @@ Route::middleware('auth')->group(function () {
     Route::delete('/financial-accounts/{financialAccount}', [FinancialAccountController::class, 'destroy'])->name('financial-accounts.destroy');
     Route::get('/financial-accounts/{financialAccount}/pay', [FinancialAccountController::class, 'pay'])->name('financial-accounts.pay');
     Route::put('financial-accounts/{financialAccount}/process', [FinancialAccountController::class, 'process'])->name('financial-accounts.process');
+
+    Route::get('/installments/{installment}/edit', [InstallmentController::class, 'edit'])->name('installments.edit');
+    Route::put('/installments/{installment}', [InstallmentController::class, 'update'])->name('installments.update');
+    Route::delete('/installments/{installment}', [InstallmentController::class, 'destroy'])->name('installments.destroy');
+    Route::get('/installments/{installment}/pay', [InstallmentController::class, 'pay'])->name('installments.pay');
+    Route::put('installments/{installment}/process', [InstallmentController::class, 'process'])->name('installments.process');
 
     Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
     Route::get('/transactions/create/{movementType}', [TransactionController::class, 'create'])->name('transactions.create');

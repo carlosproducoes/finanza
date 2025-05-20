@@ -21,6 +21,31 @@
 
                             @include('financial-accounts.form')
 
+                            <div class="mt-4">
+                                <x-input-label for="is_installment" value="É parcelado:" />
+
+                                <input id="is_installment"
+                                                type="checkbox"
+                                                name="is_installment"
+                                                @if(old('is_installment') == 'on') checked @endif />
+
+                                <x-input-error :messages="$errors->get('is_installment')" class="mt-2" />
+                            </div>
+
+                            <div class="mt-4 @if(old('is_installment') != 'on') hidden @endif">
+                                <x-input-label for="number_installments" value="Número de parcelas:" />
+
+                                <x-text-input id="number_installments" class="block mt-1 w-full"
+                                                type="number"
+                                                name="number_installments"
+                                                value="{{ old('number_installments') }}"
+                                                step="1" 
+                                                min="1"
+                                                :disabled="old('is_installment') != 'on'" />
+
+                                <x-input-error :messages="$errors->get('number_installments')" class="mt-2" />
+                            </div>
+
                             <button class="bg-blue-500 text-white py-1 px-2 mt-3 rounded">Adicionar</button>
                         </form>
 
@@ -29,5 +54,9 @@
             </div>
         </div>
     </div>
-    
+
+    @push('scripts')
+        @vite(['resources/js/financial-accounts/create.js'])
+    @endpush
+
 </x-app-layout>

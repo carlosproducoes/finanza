@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\FinancialAccount;
 use Carbon\Carbon;
 use App\Services\FinancialAccountService;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -29,6 +30,7 @@ class FinancialAccountController extends Controller
                                 ->whereYear('fa.due_date', $year)
                                 ->whereMonth('fa.due_date', $month)
                                 ->whereNull('i.id')
+                                ->whereNull('fa.deleted_at')
                                 ->select(
                                     'fa.id',
                                     'fa.description',
@@ -43,7 +45,8 @@ class FinancialAccountController extends Controller
                                     'fa.company_id',
                                     'fa.created_at',
                                     'fa.updated_at',
-                                    'fa.deleted_at'
+                                    'fa.deleted_at',
+                                    DB::raw('"financial_account" as type')
                                 )
                                 ->unionAll(
                                     DB::table('installments as i')
@@ -52,9 +55,10 @@ class FinancialAccountController extends Controller
                                         ->where('i.company_id', session('company_id'))
                                         ->whereYear('i.due_date', $year)
                                         ->whereMonth('i.due_date', $month)
+                                        ->whereNull('i.deleted_at')
                                         ->select(
                                             'i.id',
-                                            'fa.description',
+                                            DB::raw('CONCAT(fa.description, " (", i.number, "/", fa.total_installments, ")")'),
                                             'i.due_date',
                                             'i.payment_date',
                                             'i.projected_amount',
@@ -66,7 +70,8 @@ class FinancialAccountController extends Controller
                                             'i.company_id',
                                             'i.created_at',
                                             'i.updated_at',
-                                            'i.deleted_at'
+                                            'i.deleted_at',
+                                            DB::raw('"installment" as type')
                                         )
                                 )
                                 ->orderBy('due_date')
@@ -103,6 +108,8 @@ class FinancialAccountController extends Controller
             'due_date' => 'required|date',
             'projected_amount' => 'required|numeric',
             'category_id' => 'required|exists:categories,id,company_id,' . session('company_id') . ',movement_type,' . $request->movement_type,
+            'is_installment' => 'in:on',
+            'number_installments' => 'required_if:is_installment,on|integer|min:1'
         ], [
             'description.required' => 'A descrição é obrigatória',
             'description.string' => 'Descrição inválida',
@@ -116,6 +123,12 @@ class FinancialAccountController extends Controller
 
             'category_id.required' => 'A categoria é obrigatória',
             'category_id.exists' => 'Categoria inválida',
+
+            'is_installment.in' => 'Erro ao definir as parcelas',
+
+            'number_installments.required_if' => 'O número de parcelas é obrigatório',
+            'number_installments.integer' => 'Número de parcelas inválido',
+            'number_installments.min' => 'O número de parcelas deve ser no mínimo 1'
         ]);
 
         $data = $request->only([
@@ -123,7 +136,8 @@ class FinancialAccountController extends Controller
             'due_date',
             'projected_amount',
             'movement_type',
-            'category_id'
+            'category_id',
+            'number_installments'
         ]);
 
         FinancialAccountService::storeFinancialAccount($data);
