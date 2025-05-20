@@ -64,6 +64,7 @@ Table financial_accounts {
   projected_amount decimal(10, 2) [not null]
   paid_amount decimal(10, 2)
   movement_type enum('entry', 'exit') [not null]
+  total_installments integer [default: 0]
   status enum('pending', 'paid', 'overdue') [not null, default: 'pending']
   category_id integer [not null]
   company_id integer [not null]

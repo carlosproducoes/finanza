@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Models\Category;
 use App\Models\FinancialAccount;
+use App\Services\InstallmentService;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class FinancialAccountService
@@ -16,14 +18,35 @@ class FinancialAccountService
             $description = Category::find($data['category_id'])->name;
         }
 
-        FinancialAccount::create([
+        $financialAccount = FinancialAccount::create([
             'description' => $description,
             'due_date' => $data['due_date'],
             'projected_amount' => $data['projected_amount'],
             'movement_type' => $data['movement_type'],
+            'total_installments' => $data['number_installments'],
+            'status' => 'pending',
             'category_id' => $data['category_id'],
             'company_id' => session('company_id')
         ]);
+
+        if (!empty($data['number_installments'])) {
+            $numberInstallments = $data['number_installments'];
+            $projectedAmount = $data['projected_amount'] / $numberInstallments;
+            $dueDate = Carbon::createFromFormat('Y-m-d', $data['due_date']);
+
+            for ($i = 1; $i <= $numberInstallments; $i++) {
+                InstallmentService::storeInstallment([
+                    'number' => $i,
+                    'due_date' => $dueDate->format('Y-m-d'),
+                    'projected_amount' => $projectedAmount,
+                    'status' => 'pending',
+                    'financial_account_id' => $financialAccount->id,
+                    'company_id' => session('company_id')
+                ]);
+
+                $dueDate->addMonth();
+            }
+        }
     }
 
     public static function updateFinancialAccount (Array $data, FinancialAccount $financialAccount)

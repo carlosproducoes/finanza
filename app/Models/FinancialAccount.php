@@ -16,6 +16,7 @@ class FinancialAccount extends Model
         'due_date',
         'projected_amount',
         'movement_type',
+        'total_installments',
         'category_id',
         'company_id'
     ];
@@ -28,5 +29,10 @@ class FinancialAccount extends Model
     public function company ()
     {
         return $this->belongsTo(Company::class);
+    }
+    
+    public function installments ()
+    {
+        return $this->hasMany(Installment::class);
     }
 }

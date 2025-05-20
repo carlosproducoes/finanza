@@ -5,10 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\BankAccount;
 use App\Models\Category;
 use App\Models\FinancialAccount;
-use App\Models\Transaction;
 use Carbon\Carbon;
 use App\Services\FinancialAccountService;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class FinancialAccountController extends Controller
 {
@@ -22,11 +23,60 @@ class FinancialAccountController extends Controller
 
         [$month, $year] = explode('-', $date);
 
-        $financialAccounts = FinancialAccount::where('company_id', '=', session('company_id'))
-                                                ->whereMonth('due_date', $month)
-                                                ->whereYear('due_date', $year)
-                                                ->get();
-        
+        $financialAccounts = DB::table('financial_accounts as fa')
+                                ->leftJoin('installments as i', 'fa.id', '=', 'i.financial_account_id')
+                                ->join('categories as c', 'fa.category_id', '=', 'c.id')
+                                ->where('fa.company_id', session('company_id'))
+                                ->whereYear('fa.due_date', $year)
+                                ->whereMonth('fa.due_date', $month)
+                                ->whereNull('i.id')
+                                ->whereNull('fa.deleted_at')
+                                ->select(
+                                    'fa.id',
+                                    'fa.description',
+                                    'fa.due_date',
+                                    'fa.payment_date',
+                                    'fa.projected_amount',
+                                    'fa.paid_amount',
+                                    'fa.movement_type',
+                                    'fa.total_installments',
+                                    'fa.status',
+                                    'c.name as category',
+                                    'fa.company_id',
+                                    'fa.created_at',
+                                    'fa.updated_at',
+                                    'fa.deleted_at',
+                                    DB::raw('"financial_account" as type')
+                                )
+                                ->unionAll(
+                                    DB::table('installments as i')
+                                        ->join('financial_accounts as fa', 'i.financial_account_id', '=', 'fa.id')
+                                        ->join('categories as c', 'fa.category_id', '=', 'c.id')
+                                        ->where('i.company_id', session('company_id'))
+                                        ->whereYear('i.due_date', $year)
+                                        ->whereMonth('i.due_date', $month)
+                                        ->whereNull('i.deleted_at')
+                                        ->select(
+                                            'i.id',
+                                            DB::raw('CONCAT(fa.description, " (", i.number, "/", fa.total_installments, ")")'),
+                                            'i.due_date',
+                                            'i.payment_date',
+                                            'i.projected_amount',
+                                            'i.paid_amount',
+                                            'fa.movement_type',
+                                            'fa.total_installments',
+                                            'i.status',
+                                            'c.name as category',
+                                            'i.company_id',
+                                            'i.created_at',
+                                            'i.updated_at',
+                                            'i.deleted_at',
+                                            DB::raw('"installment" as type')
+                                        )
+                                )
+                                ->orderBy('due_date')
+                                ->get();
+
         return view('financial-accounts.index', [
             'financialAccounts' => $financialAccounts,
             'date' => $date
@@ -58,6 +108,8 @@ class FinancialAccountController extends Controller
             'due_date' => 'required|date',
             'projected_amount' => 'required|numeric',
             'category_id' => 'required|exists:categories,id,company_id,' . session('company_id') . ',movement_type,' . $request->movement_type,
+            'is_installment' => 'in:on',
+            'number_installments' => 'required_if:is_installment,on|integer|min:1'
         ], [
             'description.required' => 'A descrição é obrigatória',
             'description.string' => 'Descrição inválida',
@@ -71,6 +123,12 @@ class FinancialAccountController extends Controller
 
             'category_id.required' => 'A categoria é obrigatória',
             'category_id.exists' => 'Categoria inválida',
+
+            'is_installment.in' => 'Erro ao definir as parcelas',
+
+            'number_installments.required_if' => 'O número de parcelas é obrigatório',
+            'number_installments.integer' => 'Número de parcelas inválido',
+            'number_installments.min' => 'O número de parcelas deve ser no mínimo 1'
         ]);
 
         $data = $request->only([
@@ -78,7 +136,8 @@ class FinancialAccountController extends Controller
             'due_date',
             'projected_amount',
             'movement_type',
-            'category_id'
+            'category_id',
+            'number_installments'
         ]);
 
         FinancialAccountService::storeFinancialAccount($data);
