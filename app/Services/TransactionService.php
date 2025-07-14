@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 class TransactionService
 {
 
-    public static function storeTransaction (Array $data)
+    public function storeTransaction (Array $data)
     {
         DB::transaction(function () use ($data) {
 
@@ -43,7 +43,7 @@ class TransactionService
         });
     }
 
-    public static function updateTransaction (Array $data, Transaction $transaction)
+    public function updateTransaction (Array $data, Transaction $transaction)
     {
         DB::transaction(function () use ($data, $transaction) {
         
@@ -99,7 +99,7 @@ class TransactionService
         });
     }
 
-    public static function destroyTransaction (Transaction $transaction)
+    public function destroyTransaction (Transaction $transaction)
     {
         $bankAccount = BankAccount::find($transaction->bank_account_id);
         

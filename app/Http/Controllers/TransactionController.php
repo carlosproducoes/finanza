@@ -11,6 +11,13 @@ use Illuminate\Http\Request;
 
 class TransactionController extends Controller
 {
+    private TransactionService $transactionService;
+
+    public function __construct (TransactionService $transactionService)
+    {
+        $this->transactionService = $transactionService;
+    }
+
     public function index (Request $request)
     {
         $date = Carbon::now()->format('m-Y');
@@ -85,7 +92,7 @@ class TransactionController extends Controller
             'bank_account'
         ]);
 
-        TransactionService::storeTransaction($data);
+        $this->transactionService->storeTransaction($data);
 
         return redirect()->route('transactions.index');
     }
@@ -142,7 +149,7 @@ class TransactionController extends Controller
             'bank_account'
         ]);
 
-        TransactionService::updateTransaction($data, $transaction);
+        $this->transactionService->updateTransaction($data, $transaction);
 
         return redirect()->route('transactions.index');
     }
@@ -153,7 +160,7 @@ class TransactionController extends Controller
             return redirect()->route('transactions.index');
         }
 
-        TransactionService::destroyTransaction($transaction);
+        $this->transactionService->destroyTransaction($transaction);
 
         return redirect()->route('transactions.index');
     }
