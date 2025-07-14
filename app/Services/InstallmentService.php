@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 
 class InstallmentService
 {
-    public static function storeInstallment (Array $data)
+    public function storeInstallment (Array $data)
     {
 
         Installment::create([
@@ -22,7 +22,7 @@ class InstallmentService
         ]);
     }
 
-    public static function updateInstallment (Array $data, Installment $installment)
+    public function updateInstallment (Array $data, Installment $installment)
     {
 
         $installment->due_date = $data['due_date'];
@@ -31,7 +31,7 @@ class InstallmentService
         $installment->save();
     }
 
-    public static function processInstallment (Array $data, Installment $installment)
+    public function processInstallment (Array $data, Installment $installment)
     {
         DB::transaction(function () use ($data, $installment) {
             $installment->payment_date = $data['payment_date'];
@@ -52,7 +52,7 @@ class InstallmentService
         });
     }
 
-    public static function destroyInstallment (Installment $installment)
+    public function destroyInstallment (Installment $installment)
     {
         $financialAccountId = $installment->financial_account_id;
 

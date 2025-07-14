@@ -13,6 +13,13 @@ use Illuminate\Support\Facades\DB;
 
 class FinancialAccountController extends Controller
 {
+    private FinancialAccountService $financialAccountService;
+
+    public function __construct (FinancialAccountService $financialAccountService)
+    {
+        $this->financialAccountService = $financialAccountService;
+    }
+
     public function index (Request $request)
     {
         $date = Carbon::now()->format('m-Y');
@@ -140,7 +147,7 @@ class FinancialAccountController extends Controller
             'number_installments'
         ]);
 
-        FinancialAccountService::storeFinancialAccount($data);
+        $this->financialAccountService->storeFinancialAccount($data);
 
         return redirect()->route('financial-accounts.index');
     }
@@ -192,7 +199,7 @@ class FinancialAccountController extends Controller
             'category_id'
         ]);
 
-        FinancialAccountService::updateFinancialAccount($data, $financialAccount);
+        $this->financialAccountService->updateFinancialAccount($data, $financialAccount);
 
         return redirect()->route('financial-accounts.index');
     }
@@ -238,7 +245,7 @@ class FinancialAccountController extends Controller
             'bank_account'
         ]);
 
-        FinancialAccountService::processFinancialAccount($data, $financialAccount);
+        $this->financialAccountService->processFinancialAccount($data, $financialAccount);
 
         return redirect()->route('financial-accounts.index');
     }
@@ -249,7 +256,7 @@ class FinancialAccountController extends Controller
             return redirect()->route('financial-accounts.index');
         }
         
-        FinancialAccountService::destroyFinancialAccount($financialAccount);
+        $this->financialAccountService->destroyFinancialAccount($financialAccount);
 
         return redirect()->route('financial-accounts.index');
     }
