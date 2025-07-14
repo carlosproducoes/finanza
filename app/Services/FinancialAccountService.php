@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 
 class FinancialAccountService
 {
-    public static function storeFinancialAccount (Array $data)
+    public function storeFinancialAccount (Array $data)
     {
         $description = $data['description'];
 
@@ -49,7 +49,7 @@ class FinancialAccountService
         }
     }
 
-    public static function updateFinancialAccount (Array $data, FinancialAccount $financialAccount)
+    public function updateFinancialAccount (Array $data, FinancialAccount $financialAccount)
     {
         $description = $data['description'];
 
@@ -65,7 +65,7 @@ class FinancialAccountService
         $financialAccount->save();
     }
 
-    public static function processFinancialAccount (Array $data, FinancialAccount $financialAccount)
+    public function processFinancialAccount (Array $data, FinancialAccount $financialAccount)
     {
         DB::transaction(function () use ($data, $financialAccount) {
             $financialAccount->payment_date = $data['payment_date'];
@@ -86,7 +86,7 @@ class FinancialAccountService
         });
     }
 
-    public static function destroyFinancialAccount (FinancialAccount $financialAccount)
+    public function destroyFinancialAccount (FinancialAccount $financialAccount)
     {
         $financialAccount->delete();
     }
