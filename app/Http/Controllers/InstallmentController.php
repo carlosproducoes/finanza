@@ -10,6 +10,13 @@ use Illuminate\Http\Request;
 
 class InstallmentController extends Controller
 {
+    private InstallmentService $installmentService;
+
+    public function __construct (InstallmentService $installmentService)
+    {
+        $this->installmentService = $installmentService;
+    }
+
     public function edit (Installment $installment)
     {
         if ($installment->company_id != session('company_id')) {
@@ -46,7 +53,7 @@ class InstallmentController extends Controller
             'projected_amount'
         ]);
 
-        InstallmentService::updateInstallment($data, $installment);
+        $this->installmentService->updateInstallment($data, $installment);
 
         return redirect()->route('financial-accounts.index');
     }
@@ -92,7 +99,7 @@ class InstallmentController extends Controller
             'bank_account'
         ]);
 
-        InstallmentService::processInstallment($data, $installment);
+        $this->installmentService->processInstallment($data, $installment);
 
         return redirect()->route('financial-accounts.index');
     }
@@ -103,7 +110,7 @@ class InstallmentController extends Controller
             return redirect()->route('financial-accounts.index');
         }
         
-        InstallmentService::destroyInstallment($installment);
+        $this->installmentService->destroyInstallment($installment);
 
         return redirect()->route('financial-accounts.index');
     }
